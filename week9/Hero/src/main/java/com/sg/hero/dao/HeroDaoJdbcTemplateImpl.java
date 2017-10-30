@@ -81,8 +81,8 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     private static final String SQL_SELECT_LOCATION
             = "select * from Location where LocationID = ?";
-    
-     private static final String SQL_SELECT_LOCATION_BYSIGHTING
+
+    private static final String SQL_SELECT_LOCATION_BYSIGHTING
             = "select * from Location right join sighting on LocationID = location where sightID = ?";
 
     private static final String SQL_SELECT_ALL_LOCATION
@@ -135,13 +135,15 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     private static final String SQL_UPDATE_SIGHTING
             = "update sighting set location = ?, sightDate = ?, sightDesc = ? where sightID = ?";
-   
 
     private static final String SQL_SELECT_SIGHTING
             = "select * from sighting right join location on location = LocationID where sightID = ?";
 
     private static final String SQL_SELECT_ALL_SIGHTING
             = "select * from sighting inner join location on LocationID = location";
+
+    private static final String SQL_MOST_RECENT_SIGHTINGS
+            = "SELECT * FROM sighting inner join location on LocationID = location order by sightDate desc limit 10";
 //bridgetables
     //heropower
     private static final String SQL_INSERT_HEROPOWER
@@ -153,6 +155,9 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     private static final String SQL_DELETE_HEROPOWER_BYPOWER
             = "delete from HeroPower where PowerID = ?";
+
+    private static final String SQL_DELETE_HEROPOWER_BY_HERO
+            = "delete from HeroPower where HeroID = ?";
 
     private static final String SQL_SELECT_HERO_BY_POWER
             = "select * from HeroPower where PowerID = ?";
@@ -274,7 +279,8 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
                 champion.getName(),
                 champion.getChampionDesc(),
                 champion.isIsHero(),
-        champion.getChampionID());
+                champion.getChampionID());
+        insertHerosPowers(champion);
     }
 
     @Override
@@ -301,8 +307,21 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     @Override
     public List<Champion> getAllChampions() {
-        return jdbcTemplate.query(SQL_SELECT_ALL_CHAMPIONS,
+        List<Champion> champs = jdbcTemplate.query(SQL_SELECT_ALL_CHAMPIONS,
                 new ChampionMapper());
+        for (Champion currentChamp : champs) {
+            List<Integer> powerIDs = jdbcTemplate.queryForList(SQL_SELECT_POWER_BY_HERO,
+                    Integer.class,
+                    currentChamp.getChampionID());
+            List<Power> powers = new ArrayList<>();
+            for (int currentInt : powerIDs) {
+                powers.add(jdbcTemplate.queryForObject(SQL_SELECT_POWERS,
+                        new PowerMapper(),
+                        currentInt));
+            }
+            currentChamp.setPowers(powers);
+        }
+        return champs;
     }
 
     @Override
@@ -392,7 +411,7 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
             Organization org = jdbcTemplate.queryForObject(SQL_SELECT_ORGANIZATION,
                     new OrganizationMapper(),
                     id);
-            List<Integer> contIDs =  jdbcTemplate.queryForList(SQL_SELECT_CONT_BY_ORG,
+            List<Integer> contIDs = jdbcTemplate.queryForList(SQL_SELECT_CONT_BY_ORG,
                     Integer.class,
                     org.getOrganizationID());
             List<Contact> contacts = new ArrayList<>();
@@ -419,15 +438,15 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
                         new ChampionMapper(),
                         currentInt));
             }
-            for(Champion currentChampion: champions){
+            for (Champion currentChampion : champions) {
                 List<Integer> powerIDs = jdbcTemplate.queryForList(SQL_SELECT_POWER_BY_HERO,
-                    Integer.class,
-                    currentChampion.getChampionID());
+                        Integer.class,
+                        currentChampion.getChampionID());
                 List<Power> powers = new ArrayList<>();
-                for(int current: powerIDs){
+                for (int current : powerIDs) {
                     powers.add(jdbcTemplate.queryForObject(SQL_SELECT_POWERS,
                             new PowerMapper(),
-                            current));   
+                            current));
                 }
                 currentChampion.setPowers(powers);
             }
@@ -442,8 +461,54 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     @Override
     public List<Organization> getAllOrganizations() {
-        return jdbcTemplate.query(SQL_SELECT_ALL_ORGANIZATION,
+        List<Organization> orgs = jdbcTemplate.query(SQL_SELECT_ALL_ORGANIZATION,
                 new OrganizationMapper());
+        for (Organization currentOrg : orgs) {
+            List<Integer> contIDs = jdbcTemplate.queryForList(SQL_SELECT_CONT_BY_ORG,
+                    Integer.class,
+                    currentOrg.getOrganizationID());
+            List<Contact> contacts = new ArrayList<>();
+            for (int currentInt : contIDs) {
+                contacts.add(jdbcTemplate.queryForObject(SQL_SELECT_CONTACT,
+                        new ContactMapper(),
+                        currentInt));
+            }
+            List<Integer> locIDs = jdbcTemplate.queryForList(SQL_SELECT_LOC_BY_ORG,
+                    Integer.class,
+                    currentOrg.getOrganizationID());
+            List<Location> locations = new ArrayList<>();
+            for (int currentInt : locIDs) {
+                locations.add(jdbcTemplate.queryForObject(SQL_SELECT_LOCATION,
+                        new LocationMapper(),
+                        currentInt));
+            }
+            List<Integer> champIDs = jdbcTemplate.queryForList(SQL_SELECT_HERO_BY_ORG,
+                    Integer.class,
+                    currentOrg.getOrganizationID());
+            List<Champion> champions = new ArrayList<>();
+            for (int currentInt : champIDs) {
+                champions.add(jdbcTemplate.queryForObject(SQL_SELECT_CHAMPION,
+                        new ChampionMapper(),
+                        currentInt));
+            }
+            for (Champion currentChampion : champions) {
+                List<Integer> powerIDs = jdbcTemplate.queryForList(SQL_SELECT_POWER_BY_HERO,
+                        Integer.class,
+                        currentChampion.getChampionID());
+                List<Power> powers = new ArrayList<>();
+                for (int current : powerIDs) {
+                    powers.add(jdbcTemplate.queryForObject(SQL_SELECT_POWERS,
+                            new PowerMapper(),
+                            current));
+                }
+                currentChampion.setPowers(powers);
+            }
+            currentOrg.setContacts(contacts);
+            currentOrg.setLocations(locations);
+            currentOrg.setChampions(champions);
+        }
+
+        return orgs;
     }
 
     @Override
@@ -593,25 +658,25 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
             for (int currentInt : heroIDs) {
                 champions.add(jdbcTemplate.queryForObject(SQL_SELECT_CHAMPION,
                         new ChampionMapper(),
-                        currentInt));                
+                        currentInt));
                 //need to add powers to the champions
             }
-            
-            for(Champion currentChampion: champions){
+
+            for (Champion currentChampion : champions) {
                 List<Integer> powerIDs = jdbcTemplate.queryForList(SQL_SELECT_POWER_BY_HERO,
-                    Integer.class,
-                    currentChampion.getChampionID());
+                        Integer.class,
+                        currentChampion.getChampionID());
                 List<Power> powers = new ArrayList<>();
-                for(int current: powerIDs){
+                for (int current : powerIDs) {
                     powers.add(jdbcTemplate.queryForObject(SQL_SELECT_POWERS,
                             new PowerMapper(),
-                            current));   
+                            current));
                 }
                 currentChampion.setPowers(powers);
-                
+
             }
             sight.setHeroes(champions);
-            
+
             Location loc = jdbcTemplate.queryForObject(SQL_SELECT_LOCATION_BYSIGHTING,
                     new LocationMapper(),
                     sight.getSightingId());
@@ -624,27 +689,66 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
 
     @Override
     public List<Sighting> getAllSightings() {
-        return jdbcTemplate.query(SQL_SELECT_ALL_SIGHTING,
+        List<Sighting> sights = jdbcTemplate.query(SQL_SELECT_ALL_SIGHTING,
                 new SightingMapper());
+        sightingHelper(sights);
+        return sights;
+    }
+
+    @Override
+    public List<Sighting> getMostRecentSighting() {
+        List<Sighting> sights = jdbcTemplate.query(SQL_MOST_RECENT_SIGHTINGS,
+                new SightingMapper());
+        sightingHelper(sights);
+        return sights;
     }
 
     // HELPER METHODS
     // ==============
     //hero helper methods
     //insert all of a hero's power to SQL
+    private void sightingHelper(List<Sighting> sights) {
+        for (Sighting currentSight : sights) {
+            List<Integer> heroIDs = jdbcTemplate.queryForList(SQL_SELECT_HERO_BY_SIGHTING,
+                    Integer.class,
+                    currentSight.getSightingId());
+            List<Champion> champions = new ArrayList<>();
+            for (int currentInt : heroIDs) {
+                champions.add(jdbcTemplate.queryForObject(SQL_SELECT_CHAMPION,
+                        new ChampionMapper(),
+                        currentInt));
+                //need to add powers to the champions
+            }
+
+            for (Champion currentChampion : champions) {
+                List<Integer> powerIDs = jdbcTemplate.queryForList(SQL_SELECT_POWER_BY_HERO,
+                        Integer.class,
+                        currentChampion.getChampionID());
+                List<Power> powers = new ArrayList<>();
+                for (int current : powerIDs) {
+                    powers.add(jdbcTemplate.queryForObject(SQL_SELECT_POWERS,
+                            new PowerMapper(),
+                            current));
+                }
+                currentChampion.setPowers(powers);
+
+            }
+            currentSight.setHeroes(champions);
+
+            Location loc = jdbcTemplate.queryForObject(SQL_SELECT_LOCATION_BYSIGHTING,
+                    new LocationMapper(),
+                    currentSight.getSightingId());
+            currentSight.setLocation(loc);
+        }
+    }
+
     private void insertHerosPowers(Champion champion) {
         final int champid = champion.getChampionID();
         final List<Power> powers = champion.getPowers();
 
-        for (Power thisPower : powers) {
-            jdbcTemplate.update(SQL_INSERT_POWERS,
-                    thisPower.getName(),
-                    thisPower.getPowerDesc());
-            int PowerId
-                    = jdbcTemplate.queryForObject("select LAST_INSERT_ID()",
-                            Integer.class);
-            thisPower.setPowerID(PowerId);
-        }
+        //delete all existing powers associated with the championID
+        jdbcTemplate.update(SQL_DELETE_HEROPOWER_BY_HERO,
+                champid);
 
         for (Power currentPower : powers) {
             jdbcTemplate.update(SQL_INSERT_HEROPOWER,
@@ -652,8 +756,6 @@ public class HeroDaoJdbcTemplateImpl implements HeroDao {
                     currentPower.getPowerID());
         }
     }
-//return a list of powers based on a hero ID
-    //to associate powers from this to a hero hero.setpowers(this method)
 
     private List<Power> findPowersForChampions(Champion champ) {
         return jdbcTemplate.query(SQL_SELECT_POWER_BY_HERO,

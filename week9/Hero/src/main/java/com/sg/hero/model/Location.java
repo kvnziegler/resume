@@ -17,7 +17,7 @@ public class Location {
     private String address;
     private String locationDesc;
     private double longitutde;
-    private double lattitude;
+        private double lattitude;
 
     public int getLocationId() {
         return locationId;

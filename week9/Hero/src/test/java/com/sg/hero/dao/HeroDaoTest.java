@@ -78,6 +78,12 @@ public class HeroDaoTest {
         for (Sighting currentSighting : sightings) {
             dao.deleteSighting(currentSighting);
         }
+        
+        Power tick = new Power();
+        tick.setName("sample");
+        tick.setPowerDesc("sample desc");
+        
+        dao.addPower(tick);
     }
     
     @After
@@ -94,11 +100,7 @@ public class HeroDaoTest {
     @Test
     public void testAddChampion() {
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();       
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -116,11 +118,7 @@ public class HeroDaoTest {
     @Test
     public void testDeleteChampion() {
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -144,11 +142,7 @@ public class HeroDaoTest {
     @Test
     public void testUpdateChampion() {
          Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -169,11 +163,7 @@ public class HeroDaoTest {
     @Test
     public void testGetChampionById() {
                 Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -194,17 +184,14 @@ public class HeroDaoTest {
         assertEquals(0, dao.getAllChampions().size());
         
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
         champ.setPowers(powers);
         
         dao.addChampion(champ);
+        List<Champion> champs = dao.getAllChampions();
         
         assertEquals(1,dao.getAllChampions().size());
     }
@@ -236,7 +223,7 @@ public class HeroDaoTest {
     @Test
     public void testDeletePower() {
         
-        assertEquals(0, dao.getAllPowers().size());
+        assertEquals(1, dao.getAllPowers().size());
         
         Power power = new Power();
         power.setName("Lizard Vision");
@@ -246,11 +233,11 @@ public class HeroDaoTest {
         
         Power lizards = dao.getPowerById(power.getPowerID());
         
-        assertEquals(1, dao.getAllPowers().size());
+        assertEquals(2, dao.getAllPowers().size());
         
         dao.deletePower(power);
         
-        assertEquals(0, dao.getAllPowers().size());
+        assertEquals(1, dao.getAllPowers().size());
         
         
     }
@@ -298,7 +285,7 @@ public class HeroDaoTest {
     @Test
     public void testGetAllPowers() {
         
-        assertEquals(0, dao.getAllPowers().size());
+        assertEquals(1, dao.getAllPowers().size());
         
         Power power = new Power();
         power.setName("Lizard Vision");
@@ -310,7 +297,7 @@ public class HeroDaoTest {
         
         assertEquals(power,lizards);
         
-        assertEquals(1, dao.getAllPowers().size());
+        assertEquals(2, dao.getAllPowers().size());
     }
 
     /**
@@ -326,16 +313,7 @@ public class HeroDaoTest {
         List<Champion> champions = new ArrayList<>();
         List<Contact> contacts = new ArrayList<>();
         List<Location> locations = new ArrayList<>();
-        List<Power> powers = new ArrayList<>();
-        Power power = new Power();
-        
-        power.setName("SuperSpeed");
-        power.setPowerDesc("only after 20 cups of coffee");
-        dao.addPower(power);
-        
-        assertEquals(1,dao.getAllPowers().size());
-        
-        powers.add(power);
+        List<Power> powers = dao.getAllPowers();
         
         Champion champ = new Champion();
         champ.setName("JavaMan");
@@ -398,16 +376,7 @@ public class HeroDaoTest {
         List<Champion> champions = new ArrayList<>();
         List<Contact> contacts = new ArrayList<>();
         List<Location> locations = new ArrayList<>();
-        List<Power> powers = new ArrayList<>();
-        Power power = new Power();
-        
-        power.setName("SuperSpeed");
-        power.setPowerDesc("only after 20 cups of coffee");
-        dao.addPower(power);
-        
-        assertEquals(1,dao.getAllPowers().size());
-        
-        powers.add(power);
+        List<Power> powers = dao.getAllPowers();
         
         Champion champ = new Champion();
         champ.setName("JavaMan");
@@ -464,16 +433,7 @@ public class HeroDaoTest {
         List<Champion> champions = new ArrayList<>();
         List<Contact> contacts = new ArrayList<>();
         List<Location> locations = new ArrayList<>();
-        List<Power> powers = new ArrayList<>();
-        Power power = new Power();
-        
-        power.setName("SuperSpeed");
-        power.setPowerDesc("only after 20 cups of coffee");
-        dao.addPower(power);
-        
-        assertEquals(1,dao.getAllPowers().size());
-        
-        powers.add(power);
+        List<Power> powers = dao.getAllPowers();
         
         Champion champ = new Champion();
         champ.setName("JavaMan");
@@ -531,16 +491,7 @@ public class HeroDaoTest {
          List<Champion> champions = new ArrayList<>();
         List<Contact> contacts = new ArrayList<>();
         List<Location> locations = new ArrayList<>();
-        List<Power> powers = new ArrayList<>();
-        Power power = new Power();
-        
-        power.setName("SuperSpeed");
-        power.setPowerDesc("only after 20 cups of coffee");
-        dao.addPower(power);
-        
-        assertEquals(1,dao.getAllPowers().size());
-        
-        powers.add(power);
+        List<Power> powers = dao.getAllPowers();
         
         Champion champ = new Champion();
         champ.setName("JavaMan");
@@ -603,16 +554,7 @@ public class HeroDaoTest {
         List<Champion> champions = new ArrayList<>();
         List<Contact> contacts = new ArrayList<>();
         List<Location> locations = new ArrayList<>();
-        List<Power> powers = new ArrayList<>();
-        Power power = new Power();
-        
-        power.setName("SuperSpeed");
-        power.setPowerDesc("only after 20 cups of coffee");
-        dao.addPower(power);
-        
-        assertEquals(1,dao.getAllPowers().size());
-        
-        powers.add(power);
+        List<Power> powers = dao.getAllPowers();
         
         Champion champ = new Champion();
         champ.setName("JavaMan");
@@ -653,6 +595,8 @@ public class HeroDaoTest {
         org.setContacts(contacts);
         
         dao.addOrganization(org);
+        
+        List<Organization> orgList = dao.getAllOrganizations();
         
         assertEquals(1, dao.getAllOrganizations().size());
     }
@@ -874,11 +818,7 @@ public class HeroDaoTest {
     public void testAddSighting() {
         
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -922,11 +862,7 @@ public class HeroDaoTest {
     @Test
     public void testDeleteSighting() {
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -966,11 +902,7 @@ public class HeroDaoTest {
     @Test
     public void testUpdateSighting() {
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -1012,11 +944,7 @@ public class HeroDaoTest {
     @Test
     public void testGetSightingById() {
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);
@@ -1054,11 +982,7 @@ public class HeroDaoTest {
     public void testGetAllSightings() {
         
         Champion champ = new Champion();
-        List<Power> powers = new ArrayList<Power>();
-        Power tick = new Power();
-        tick.setName("sample");
-        tick.setPowerDesc("sample desc");
-        powers.add(tick);
+        List<Power> powers = dao.getAllPowers();
         champ.setName("The Tick");
         champ.setChampionDesc("Big and Blue");
         champ.setIsHero(true);

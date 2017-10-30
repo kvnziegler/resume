@@ -85,4 +85,6 @@ public interface HeroDao {
     public Sighting getSightingById(int id);
 
     public List<Sighting> getAllSightings();
+    
+    public List<Sighting> getMostRecentSighting();
 }

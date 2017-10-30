@@ -7,11 +7,16 @@ package com.sg.hero.controller;
 
 import com.sg.hero.dao.HeroDao;
 import com.sg.hero.model.Champion;
+import com.sg.hero.model.Power;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -29,56 +34,112 @@ public class HeroController {
         this.dao = dao;
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String displayIndexPage(Map<String, Object> model) {
-        
-        
-        //have the home page be able to show 10 most recent sightings
-        
-    return "index";
-    }
-    
     @RequestMapping(value = "/hero", method = RequestMethod.GET)
     public String displayHeroPage(Model model) {
         List<Champion> champs = dao.getAllChampions();
         model.addAttribute("heroList", champs);
-        //have the home page be able to show all current heros
-        
-    return "hero";
-    }
-    @RequestMapping(value = "/villain", method = RequestMethod.GET)
-    public String displayVillainPage(Map<String, Object> model) {
-        
-        
-        //have the home page be able to show all current villains
-        
-    return "villain";
+
+        List<Power> powers = dao.getAllPowers();
+        model.addAttribute("powerList", powers);
+
+        return "hero";
     }
     
-    @RequestMapping(value = "/location", method = RequestMethod.GET)
-    public String displayLocationPage(Map<String, Object> model) {
-        
-        
-        //have the home page be able to show all current locations
-        
-    return "location";
+    
+
+    @RequestMapping(value = "/createHero", method = RequestMethod.POST)
+    public String createHero(HttpServletRequest request, Model model) {
+        // grab the incoming values from the form and create a new Contact
+        // object
+        Champion champ = new Champion();
+        champ.setName(request.getParameter("heroName"));
+        champ.setChampionDesc(request.getParameter("heroDesc"));
+        champ.setIsHero(true);
+
+        String[] powersToAdd = request.getParameterValues("powersToAdd");
+        List<Power> allPowers = dao.getAllPowers();
+        List<Power> addPowers = new ArrayList<>();
+
+        for (String currentPower : powersToAdd) {
+            for (Power power : allPowers) {
+                if ((Integer.parseInt(currentPower)) == power.getPowerID()) {
+                    Power powerToAdd = dao.getPowerById(Integer.parseInt(currentPower));
+                    addPowers.add(powerToAdd);
+                }
+            }
+        }
+
+        champ.setPowers(addPowers);
+
+        dao.addChampion(champ);
+
+        List<Champion> champs = dao.getAllChampions();
+        model.addAttribute("heroList", champs);
+
+        List<Power> powers = dao.getAllPowers();
+        model.addAttribute("powerList", powers);
+
+        return "hero";
+    }
+
+    @RequestMapping(value = "/deleteHero", method = RequestMethod.GET)
+    public String deleteHero(HttpServletRequest request, Model model) {
+
+        String heroIdParameter = request.getParameter("heroId");
+        int champId = Integer.parseInt(heroIdParameter);
+        Champion champ = dao.getChampionById(champId);
+
+        dao.deleteChampion(champ);
+
+        List<Champion> champs = dao.getAllChampions();
+        model.addAttribute("heroList", champs);
+
+        List<Power> powers = dao.getAllPowers();
+        model.addAttribute("powerList", powers);
+
+        return "hero";
     }
     
-    @RequestMapping(value = "/organization", method = RequestMethod.GET)
-    public String displayOrganizationPage(Map<String, Object> model) {
+    @RequestMapping(value = "/displayEditHero", method = RequestMethod.GET)
+    public String displayEditHero(HttpServletRequest request, Model model) {
+        String heroIdParameter = request.getParameter("heroId");
+        int heroId = Integer.parseInt(heroIdParameter);
+        Champion champ = dao.getChampionById(heroId);
+        model.addAttribute("champion", champ);
         
+        List<Power> powers = dao.getAllPowers();
+        model.addAttribute("powerList", powers);
         
-        //have the home page be able to show all current organizations
-        
-    return "organization";
+        return "editHero";
     }
     
-    @RequestMapping(value = "/sighting", method = RequestMethod.GET)
-    public String displaySightingPage(Map<String, Object> model) {
+    @RequestMapping(value = "/editHero", method = RequestMethod.POST)
+    public String editHero(HttpServletRequest request, Model model) {
         
-        
-        //have the home page be able to show all current sightings
-        
-    return "sighting";
+        Champion champ = new Champion();
+        champ.setName(request.getParameter("heroName"));
+        champ.setChampionDesc(request.getParameter("heroDesc"));
+        champ.setIsHero(true);
+        champ.setChampionID(Integer.parseInt(request.getParameter("heroID")));
+
+        String[] powersToAdd = request.getParameterValues("powersToAdd");
+        List<Power> allPowers = dao.getAllPowers();
+        List<Power> addPowers = new ArrayList<>();
+
+        for (String currentPower : powersToAdd) {
+            for (Power power : allPowers) {
+                if ((Integer.parseInt(currentPower)) == power.getPowerID()) {
+                    Power powerToAdd = dao.getPowerById(Integer.parseInt(currentPower));
+                    addPowers.add(powerToAdd);
+                }
+            }
+        }
+
+        champ.setPowers(addPowers);
+
+        dao.updateChampion(champ);
+
+        return "redirect:hero";
     }
+
 }
